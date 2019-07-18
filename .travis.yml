@@ -1,0 +1,15 @@
+language: node_js
+node_js:
+  - 8.0.0
+sudo: false
+cache:
+  directories:
+    - '$HOME/.npm'
+services:
+  - postgres
+before_script:
+  - psql -c 'create database travis_ci_test;' -U postgres
+install:
+  - npm ci
+after_script:
+  - npm run coverage
