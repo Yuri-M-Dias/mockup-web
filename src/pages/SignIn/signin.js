@@ -1,18 +1,20 @@
 import React, { Component } from 'react'
-import { Link, withRouter } from 'react-router-dom'
-import Avatar from '@material-ui/core/Avatar'
-import Button from '@material-ui/core/Button'
-import CssBaseline from '@material-ui/core/CssBaseline'
-import TextField from '@material-ui/core/TextField'
-import FormControlLabel from '@material-ui/core/FormControlLabel'
-import Checkbox from '@material-ui/core/Checkbox'
-import MaterialLink from '@material-ui/core/Link'
-import Grid from '@material-ui/core/Grid'
-import Box from '@material-ui/core/Box'
-import LockOutlinedIcon from '@material-ui/icons/LockOutlined'
-import Typography from '@material-ui/core/Typography'
+import { Link as RouterLink, withRouter } from 'react-router-dom'
+
+import {
+  Avatar,
+  Button,
+  CssBaseline,
+  TextField,
+  FormControlLabel,
+  Checkbox,
+  Grid,
+  Container,
+  Typography,
+  Box,
+  Link,
+} from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
-import Container from '@material-ui/core/Container'
 
 import api from '../../services/api'
 import { login } from '../../services/auth'
@@ -43,7 +45,7 @@ class SignIn extends Component {
     }
   }
 
-  useStyles = makeStyles(theme => ({
+  classes = makeStyles(theme => ({
     '@global': {
       body: {
         backgroundColor: theme.palette.common.white,
@@ -69,20 +71,16 @@ class SignIn extends Component {
   }))
 
   render() {
-    const classes = useStyles()
     return (
       <Container component="main" maxWidth="xs">
         <CssBaseline />
         {this.state.error && <p>{this.state.error}</p>}
-        <div className={classes.paper}>
-          <Avatar className={classes.avatar}>
-            <LockOutlinedIcon />
-          </Avatar>
+        <div className={this.classes.paper}>
           <Typography component="h1" variant="h5">
             Sign in
           </Typography>
           <form
-            className={classes.form}
+            className={this.classes.form}
             onSubmit={this.handleSignIn}
             noValidate
           >
@@ -119,7 +117,7 @@ class SignIn extends Component {
               fullWidth
               variant="contained"
               color="primary"
-              className={classes.submit}
+              className={this.classes.submit}
             >
               Sign In
             </Button>
@@ -130,9 +128,11 @@ class SignIn extends Component {
                 </Link>
               </Grid>
               <Grid item>
-                <Link to="/signup" variant="body2">
-                  {"Don't have an account? Sign Up"}
-                </Link>
+                <RouterLink to="/signup">
+                  <Link variant="body2">
+                    {"Don't have an account? Sign Up"}
+                  </Link>
+                </RouterLink>
               </Grid>
             </Grid>
           </form>
