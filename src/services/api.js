@@ -2,8 +2,12 @@ import axios from 'axios'
 import { getToken } from './auth'
 
 const api = axios.create({
-  //TODO?
+  // params?!
   baseURL: 'http://127.0.0.1:3333',
+  headers: {
+    'content-type': 'application/json',
+    'X-Requested-With': 'XMLHttpRequest',
+  },
 })
 
 api.interceptors.request.use(async config => {

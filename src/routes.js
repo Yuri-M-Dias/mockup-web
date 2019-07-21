@@ -22,8 +22,9 @@ import MenuIcon from '@material-ui/icons/Menu'
 import { makeStyles, useTheme } from '@material-ui/core/styles'
 import { Link as RouterLink } from 'react-router-dom'
 
-import SignIn from './pages/SignIn/signin'
 import SignUp from './pages/SignUp/signup'
+import Teams from './pages/Teams'
+import LoginButton from './components/LoginButton'
 
 const PrivateRoute = ({ component: Component, ...rest }) => (
   <Route
@@ -121,7 +122,7 @@ const definedRoutes = [
   {
     text: 'Teams',
     path: '/teams',
-    component: () => <h1>Teams</h1>,
+    component: Teams,
   },
   {
     text: 'Products',
@@ -132,11 +133,6 @@ const definedRoutes = [
     text: 'Orders',
     path: '/orders',
     component: () => <h1>Orders</h1>,
-  },
-  {
-    text: 'Sign-in',
-    path: '/signin',
-    component: SignIn,
   },
   {
     text: 'Sign-up',
@@ -174,7 +170,7 @@ const Routes = props => {
 
   return (
     <BrowserRouter>
-      <Container maxWidth="md">
+      <Container fixed>
         <div className={classes.root}>
           <AppBar position="fixed" className={classes.appBar}>
             <Toolbar>
@@ -190,6 +186,8 @@ const Routes = props => {
               <Typography variant="h6" noWrap>
                 CubeDesign
               </Typography>
+              <div className={classes.flex} />
+              <LoginButton />
             </Toolbar>
           </AppBar>
           <nav className={classes.drawer} aria-label="Mailbox folders">
