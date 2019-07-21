@@ -87,7 +87,9 @@ class Teams extends Component {
                       </Typography>
                     </CardContent>
                     <CardActions>
-                      <Button size="small">Detalhes</Button>
+                      <Link to={`/teams/${team.id}`}>
+                        <Button size="small">Detalhes</Button>
+                      </Link>
                       <Button size="small">Compras</Button>
                     </CardActions>
                   </Card>
@@ -114,4 +116,4 @@ class Teams extends Component {
   }
 }
 
-export default withRouter(Teams)
+export default compose(withRouter)(Teams)

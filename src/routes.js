@@ -22,9 +22,10 @@ import MenuIcon from '@material-ui/icons/Menu'
 import { makeStyles, useTheme } from '@material-ui/core/styles'
 import { Link as RouterLink } from 'react-router-dom'
 
+import LoginButton from './components/LoginButton'
 import SignUp from './pages/SignUp/signup'
 import Teams from './pages/Teams'
-import LoginButton from './components/LoginButton'
+import TeamDetail from './pages/TeamDetail'
 
 const PrivateRoute = ({ component: Component, ...rest }) => (
   <Route
@@ -119,6 +120,11 @@ ListItemLinkShorthand.propTypes = {
 }
 
 const definedRoutes = [
+  {
+    text: 'TeamDetail',
+    path: '/teams/:id',
+    component: TeamDetail,
+  },
   {
     text: 'Teams',
     path: '/teams',
