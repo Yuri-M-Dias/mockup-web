@@ -188,7 +188,7 @@ const Routes = props => {
                 <MenuIcon />
               </IconButton>
               <Typography variant="h6" noWrap>
-                Responsive drawer
+                CubeDesign
               </Typography>
             </Toolbar>
           </AppBar>
