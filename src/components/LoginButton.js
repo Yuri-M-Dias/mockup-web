@@ -52,9 +52,9 @@ class LoginButton extends Component {
 
   logout = async e => {
     e.preventDefault()
+    logout()
     try {
       await api.delete('/sessions')
-      logout()
       this.handleMenuClose()
     } catch (err) {
       console.error(err)

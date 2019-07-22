@@ -6,12 +6,17 @@ import {
   withStyles,
   Typography,
   Button,
+  IconButton,
   Card,
   CardActions,
   CardHeader,
   CardContent,
+  Fab,
 } from '@material-ui/core'
-import { Add as AddIcon } from '@material-ui/icons'
+import {
+  Add as AddIcon,
+  ArrowRightAlt as ArrowRightIcon,
+} from '@material-ui/icons'
 import { orderBy } from 'lodash'
 import { compose } from 'recompose'
 
@@ -29,6 +34,15 @@ const styles = theme => ({
   control: {
     padding: theme.spacing(2),
   },
+  fab: {
+    position: 'absolute',
+    bottom: 3 * theme.spacing.unit,
+    right: 3 * theme.spacing.unit,
+    [theme.breakpoints.down('xs')]: {
+      bottom: 2 * theme.spacing.unit,
+      right: 2 * theme.spacing.unit,
+    },
+  },
 })
 
 class Teams extends Component {
@@ -42,7 +56,7 @@ class Teams extends Component {
 
   async getTeams() {
     const teams = await api.get('/teams')
-    console.log([teams])
+    //TODO: validate?
     this.setState({
       loading: false,
       teams: teams.data,
@@ -54,12 +68,12 @@ class Teams extends Component {
 
     return (
       <Fragment>
-        <Typography variant="display1">Posts Manager</Typography>
+        <Typography variant="display1">Times</Typography>
         {this.state.teams.length > 0 ? (
           <Grid container className={classes.root} spacing={5}>
             {orderBy(this.state.teams, ['total', 'name'], ['desc', 'asc']).map(
               team => (
-                <Grid item xs={12} sm={4}>
+                <Grid item xs sm>
                   <Card className={classes.card}>
                     <CardHeader title={team.name} />
                     <CardContent>
@@ -69,9 +83,11 @@ class Teams extends Component {
                     </CardContent>
                     <CardActions>
                       <Link to={`/teams/${team.id}`}>
-                        <Button size="small">Detalhes</Button>
+                        <IconButton color="inherit">
+                          <Typography size="small">Detalhes</Typography>
+                          <ArrowRightIcon />
+                        </IconButton>
                       </Link>
-                      <Button size="small">Compras</Button>
                     </CardActions>
                   </Card>
                 </Grid>
@@ -83,15 +99,11 @@ class Teams extends Component {
             <Typography variant="subheading">Sem times para mostrar</Typography>
           )
         )}
-        <Button
-          variant="fab"
-          color="secondary"
-          aria-label="add"
-          component={Link}
-          to="/posts/new"
-        >
-          <AddIcon />
-        </Button>
+        <Link to="/teams/new">
+          <Fab color="primary" aria-label="Add" className={classes.fab}>
+            <AddIcon />
+          </Fab>
+        </Link>
       </Fragment>
     )
   }

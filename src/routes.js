@@ -6,7 +6,6 @@ import PropTypes from 'prop-types'
 
 import {
   Container,
-  Box,
   AppBar,
   Divider,
   Drawer,
@@ -27,9 +26,11 @@ import { makeStyles, useTheme } from '@material-ui/core/styles'
 import { Link as RouterLink } from 'react-router-dom'
 
 import LoginButton from './components/LoginButton'
-import SignUp from './pages/SignUp/signup'
 import Teams from './pages/Teams'
 import TeamDetail from './pages/TeamDetail'
+import ProductManager from './pages/ProductManager'
+import OrderDetail from './pages/OrderDetail'
+import OrderNew from './pages/OrderNew'
 
 const PrivateRoute = ({ component: Component, ...rest }) => (
   <Route
@@ -108,10 +109,10 @@ class ListItemLink extends React.Component {
   ))
 
   render() {
-    const { icon, primary } = this.props
+    const { icon, primary, key } = this.props
     return (
       <li>
-        <ListItem button component={this.renderLink}>
+        <ListItem button key={key} component={this.renderLink}>
           <ListItemIcon>{icon}</ListItemIcon>
           <ListItemText primary={primary} />
         </ListItem>
@@ -124,6 +125,7 @@ ListItemLink.propTypes = {
   icon: PropTypes.node.isRequired,
   primary: PropTypes.node.isRequired,
   to: PropTypes.string.isRequired,
+  key: PropTypes.node.isRequired,
 }
 
 // polyfill required for react-router-dom < 5.0.0
@@ -150,28 +152,36 @@ ListItemLinkShorthand.propTypes = {
 const definedRoutes = [
   {
     text: 'TeamDetail',
-    path: '/teams/:id',
+    path: '/teams/:team_id',
     component: TeamDetail,
+    menu: false,
+    exact: true,
   },
   {
-    text: 'Teams',
+    text: 'OrderNew',
+    path: '/teams/:team_id/orders/new',
+    component: OrderNew,
+    menu: false,
+    exact: true,
+  },
+  {
+    text: 'OrderDetail',
+    path: '/teams/:team_id/orders/:order_id',
+    component: OrderDetail,
+    menu: false,
+    exact: true,
+  },
+  {
+    text: 'Times',
     path: '/teams',
     component: Teams,
+    menu: true,
   },
   {
-    text: 'Products',
+    text: 'Produtos',
     path: '/products',
-    component: () => <h1>Products</h1>,
-  },
-  {
-    text: 'Orders',
-    path: '/orders',
-    component: () => <h1>Orders</h1>,
-  },
-  {
-    text: 'Sign-up',
-    path: '/signup',
-    component: SignUp,
+    component: ProductManager,
+    menu: true,
   },
 ]
 
@@ -193,13 +203,16 @@ const Routes = props => {
       <div className={classes.toolbar} />
       <Divider />
       <List>
-        {definedRoutes.map(route => (
-          <ListItemLink
-            to={route.path}
-            primary={route.text}
-            icon={route.icon}
-          />
-        ))}
+        {definedRoutes
+          .filter(_ => _.menu)
+          .map(route => (
+            <ListItemLink
+              key={route.text}
+              to={route.path}
+              primary={route.text}
+              icon={route.icon}
+            />
+          ))}
       </List>
       <Divider />
     </div>
@@ -262,7 +275,11 @@ const Routes = props => {
               <Switch>
                 <Route exact path="/" component={() => <h1>App</h1>} />
                 {definedRoutes.map(route => (
-                  <Route path={route.path} component={route.component} />
+                  <Route
+                    exact={route.exact}
+                    path={route.path}
+                    component={route.component}
+                  />
                 ))}
                 <PrivateRoute path="/app" component={() => <h1>App</h1>} />
                 <Route path="*" component={() => <h1>Page not found</h1>} />

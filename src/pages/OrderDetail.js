@@ -48,61 +48,64 @@ const styles = theme => ({
   },
 })
 
-class TeamDetail extends Component {
+class OrderDetail extends Component {
   state = {
     loading: true,
-    team: {},
+    order: {},
   }
 
   componentDidMount() {
-    this.getTeam()
+    this.getOrder()
   }
 
-  async getTeam() {
-    const { team_id } = this.props.match.params
-    const team = await api.get(`/teams/${team_id}`)
+  async getOrder() {
+    const { team_id, order_id } = this.props.match.params
+    const order = await api.get(`/teams/${team_id}/orders/${order_id}`)
     this.setState({
       loading: false,
-      team: team.data,
+      order: order.data[0], // HACK!
     })
   }
 
   render() {
     const { classes } = this.props
+    const { team_id, order_id } = this.props.match.params
     return (
       <Fragment>
         <Grid container spacing={1}>
           <Grid item xs={12}>
-            <Typography>Informações do Time</Typography>
+            <Typography>Informações do Carrinho</Typography>
           </Grid>
           <Grid item xs={12}>
-            {this.state.team ? (
+            {this.state.order ? (
               <Grid item xs container direction="column" spacing={2}>
                 <Grid item xs={6}>
-                  <Typography>Time: {this.state.team.name}</Typography>
+                  <Typography>
+                    Penalidade: {this.state.order.price_penalty}
+                  </Typography>
                 </Grid>
                 <Grid item xs={6}>
-                  <Typography>Total: {this.state.team.total}</Typography>
+                  <Typography>Total: {this.state.order.total}</Typography>
                 </Grid>
                 <Grid item xs={12}>
-                  {this.state.team.orders ? (
+                  {this.state.order.products ? (
                     <Paper elevation={1} className={classes.orders}>
                       <List>
                         {orderBy(
-                          this.state.team.orders,
-                          ['createdAt'],
+                          this.state.order.products,
+                          ['pivot.quantity'],
                           ['desc']
-                        ).map(order => (
+                        ).map(product => (
                           <ListItem
                             className={classes.listItem}
-                            key={order.id}
+                            key={product.id}
                             button
                             component={Link}
-                            to={`/teams/${this.state.team.id}/orders/${order.id}`}
+                            to={`/products/${product.id}`}
                           >
                             <ListItemText
-                              primary={order.createdAt}
-                              secondary={order.total}
+                              primary={product.name}
+                              secondary={`${product.pivot.quantity} por ${product.base_price}`}
                             />
                             <ListItemSecondaryAction>
                               <IconButton onClick={() => null} color="inherit">
@@ -129,7 +132,7 @@ class TeamDetail extends Component {
             )}
           </Grid>
         </Grid>
-        <Link to={`/teams/${this.state.team.id}/orders/new`}>
+        <Link to={`/teams/${team_id}/orders/new`}>
           <Fab color="primary" aria-label="Add" className={classes.fab}>
             <AddIcon />
           </Fab>
@@ -139,11 +142,11 @@ class TeamDetail extends Component {
   }
 }
 
-TeamDetail.propTypes = {
+OrderDetail.propTypes = {
   classes: PropTypes.object.isRequired,
 }
 
 export default compose(
   withRouter,
   withStyles(styles)
-)(TeamDetail)
+)(OrderDetail)
