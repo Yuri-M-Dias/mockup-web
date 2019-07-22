@@ -9,6 +9,7 @@ import {
 import { AccountCircle } from '@material-ui/icons'
 import { isAuthenticated, logout } from '../services/auth'
 import LoginDialog from './LoginDialog'
+import api from '../services/api'
 
 class LoginButton extends Component {
   state = {
@@ -49,9 +50,15 @@ class LoginButton extends Component {
     })
   }
 
-  logout = () => {
-    this.handleMenuClose()
-    logout()
+  logout = async e => {
+    e.preventDefault()
+    try {
+      await api.delete('/sessions')
+      logout()
+      this.handleMenuClose()
+    } catch (err) {
+      console.error(err)
+    }
   }
 
   handleMenuOpen = event => this.setState({ menuAnchorEl: event.currentTarget })
@@ -64,7 +71,11 @@ class LoginButton extends Component {
     if (!authenticated)
       return (
         <div>
-          <Button color="inherit" onClick={this.handleOpenLoginDialog}>
+          <Button
+            color="inherit"
+            edge="end"
+            onClick={this.handleOpenLoginDialog}
+          >
             Login
           </Button>
           <LoginDialog

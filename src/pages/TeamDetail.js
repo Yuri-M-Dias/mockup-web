@@ -26,6 +26,34 @@ import { isAuthenticated } from '../services/auth'
 import api from '../services/api'
 import PropTypes from 'prop-types'
 
+const styles = theme => ({
+  root: {
+    flexGrow: 1,
+  },
+  posts: {
+    marginTop: 2 * theme.spacing.unit,
+  },
+  paper: {
+    height: 140,
+    width: 100,
+  },
+  control: {
+    padding: theme.spacing(2),
+  },
+  listItem: {
+    padding: theme.spacing(1, 0),
+  },
+  fab: {
+    position: 'absolute',
+    bottom: 3 * theme.spacing.unit,
+    right: 3 * theme.spacing.unit,
+    [theme.breakpoints.down('xs')]: {
+      bottom: 2 * theme.spacing.unit,
+      right: 2 * theme.spacing.unit,
+    },
+  },
+})
+
 class TeamDetail extends Component {
   state = {
     loading: true,
@@ -45,35 +73,64 @@ class TeamDetail extends Component {
     })
   }
 
-  classes = makeStyles(theme => ({
-    root: {
-      flexGrow: 1,
-    },
-    paper: {
-      height: 140,
-      width: 100,
-    },
-    control: {
-      padding: theme.spacing(2),
-    },
-  }))
-
   render() {
+    const { classes } = this.props
     return (
-      <Card className={this.classes.card}>
-        <CardHeader title={this.state.team.name} />
-        <CardContent>
-          <Typography color="textPrimary" gutterBottom>
-            {this.state.team.total}
-          </Typography>
-        </CardContent>
-        <CardActions>
-          <Button size="small">Detalhes</Button>
-          <Button size="small">Compras</Button>
-        </CardActions>
-      </Card>
+      <Fragment>
+        <Typography variant="display1">Informações do Time</Typography>
+        {this.state.team ? (
+          <Fragment>
+            <Typography variant="display1">
+              Time: {this.state.team.name}
+            </Typography>
+            <Typography variant="display1">
+              Total: {this.state.team.total}
+            </Typography>
+            {this.state.team.orders > 0 ? (
+              <Paper elevation={1} className={classes.orders}>
+                <List>
+                  {orderBy(this.state.team.orders, ['createdAt'], ['desc']).map(
+                    order => (
+                      <ListItem
+                        className={classes.listItem}
+                        key={order.id}
+                        button
+                        component={Link}
+                        to={`/teams/${this.state.team.id}/orders/${order.id}`}
+                      >
+                        <ListItemText
+                          primary={order.createdAt}
+                          secondary={order.total}
+                        />
+                        <ListItemSecondaryAction>
+                          <IconButton onClick={() => null} color="inherit">
+                            <DeleteIcon />
+                          </IconButton>
+                        </ListItemSecondaryAction>
+                      </ListItem>
+                    )
+                  )}
+                </List>
+              </Paper>
+            ) : (
+              !this.state.loading && (
+                <Typography variant="subheading">
+                  Sem compras feitas até o momento!
+                </Typography>
+              )
+            )}
+          </Fragment>
+        ) : (
+          !this.state.loading && (
+            <Typography variant="subheading">Time inválido</Typography>
+          )
+        )}
+      </Fragment>
     )
   }
 }
 
-export default compose(withRouter)(TeamDetail)
+export default compose(
+  withRouter,
+  withStyles(styles)
+)(TeamDetail)

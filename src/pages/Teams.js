@@ -1,32 +1,24 @@
 import React, { Component, Fragment } from 'react'
-import { withRouter, Route, Redirect, Link } from 'react-router-dom'
+import { withRouter, Link } from 'react-router-dom'
+import PropTypes from 'prop-types'
 import {
   Grid,
   withStyles,
   Typography,
   Button,
-  IconButton,
-  Paper,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemSecondaryAction,
   Card,
   CardActions,
   CardHeader,
   CardContent,
 } from '@material-ui/core'
-import { Delete as DeleteIcon, Add as AddIcon } from '@material-ui/icons'
-import { makeStyles, useTheme } from '@material-ui/core/styles'
-import moment from 'moment'
-import { find, orderBy } from 'lodash'
+import { Add as AddIcon } from '@material-ui/icons'
+import { orderBy } from 'lodash'
 import { compose } from 'recompose'
 
 import { isAuthenticated } from '../services/auth'
 import api from '../services/api'
-import PropTypes from 'prop-types'
 
-const useStyles = makeStyles(theme => ({
+const styles = theme => ({
   root: {
     flexGrow: 1,
   },
@@ -37,7 +29,7 @@ const useStyles = makeStyles(theme => ({
   control: {
     padding: theme.spacing(2),
   },
-}))
+})
 
 class Teams extends Component {
   state = {
@@ -57,29 +49,18 @@ class Teams extends Component {
     })
   }
 
-  classes = makeStyles(theme => ({
-    root: {
-      flexGrow: 1,
-    },
-    paper: {
-      height: 140,
-      width: 100,
-    },
-    control: {
-      padding: theme.spacing(2),
-    },
-  }))
-
   render() {
+    const { classes } = this.props
+
     return (
       <Fragment>
         <Typography variant="display1">Posts Manager</Typography>
         {this.state.teams.length > 0 ? (
-          <Grid container className={this.classes.root} spacing={5}>
+          <Grid container className={classes.root} spacing={5}>
             {orderBy(this.state.teams, ['total', 'name'], ['desc', 'asc']).map(
               team => (
                 <Grid item xs={12} sm={4}>
-                  <Card className={this.classes.card}>
+                  <Card className={classes.card}>
                     <CardHeader title={team.name} />
                     <CardContent>
                       <Typography color="textPrimary" gutterBottom>
@@ -116,4 +97,11 @@ class Teams extends Component {
   }
 }
 
-export default compose(withRouter)(Teams)
+Teams.propTypes = {
+  classes: PropTypes.object.isRequired,
+}
+
+export default compose(
+  withRouter,
+  withStyles(styles)
+)(Teams)

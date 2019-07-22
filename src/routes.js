@@ -1,6 +1,7 @@
 import React from 'react'
 import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom'
 import { isAuthenticated } from './services/auth'
+import clsx from 'clsx'
 import PropTypes from 'prop-types'
 
 import {
@@ -9,7 +10,6 @@ import {
   AppBar,
   Divider,
   Drawer,
-  Hidden,
   IconButton,
   List,
   ListItem,
@@ -18,7 +18,11 @@ import {
   Toolbar,
   Typography,
 } from '@material-ui/core'
-import MenuIcon from '@material-ui/icons/Menu'
+import {
+  Menu as MenuIcon,
+  ChevronLeft as ChevronLeftIcon,
+  ChevronRight as ChevronRightIcon,
+} from '@material-ui/icons'
 import { makeStyles, useTheme } from '@material-ui/core/styles'
 import { Link as RouterLink } from 'react-router-dom'
 
@@ -45,31 +49,55 @@ const useStyles = makeStyles(theme => ({
   root: {
     display: 'flex',
   },
-  drawer: {
-    [theme.breakpoints.up('sm')]: {
-      width: drawerWidth,
-      flexShrink: 0,
-    },
-  },
   appBar: {
+    transition: theme.transitions.create(['margin', 'width'], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    }),
+  },
+  appBarShift: {
+    width: `calc(100% - ${drawerWidth}px)`,
     marginLeft: drawerWidth,
-    [theme.breakpoints.up('sm')]: {
-      width: `calc(100% - ${drawerWidth}px)`,
-    },
+    transition: theme.transitions.create(['margin', 'width'], {
+      easing: theme.transitions.easing.easeOut,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
   },
   menuButton: {
     marginRight: theme.spacing(2),
-    [theme.breakpoints.up('sm')]: {
-      display: 'none',
-    },
   },
-  toolbar: theme.mixins.toolbar,
+  hide: {
+    display: 'none',
+  },
+  drawer: {
+    width: drawerWidth,
+    flexShrink: 0,
+  },
   drawerPaper: {
     width: drawerWidth,
+  },
+  drawerHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    padding: '0 8px',
+    ...theme.mixins.toolbar,
+    justifyContent: 'flex-end',
   },
   content: {
     flexGrow: 1,
     padding: theme.spacing(3),
+    transition: theme.transitions.create('margin', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    }),
+    marginLeft: -drawerWidth,
+  },
+  contentShift: {
+    transition: theme.transitions.create('margin', {
+      easing: theme.transitions.easing.easeOut,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+    marginLeft: 0,
   },
 }))
 
@@ -148,13 +176,16 @@ const definedRoutes = [
 ]
 
 const Routes = props => {
-  const { container } = props
   const classes = useStyles()
   const theme = useTheme()
-  const [mobileOpen, setMobileOpen] = React.useState(false)
+  const [open, setOpen] = React.useState(false)
 
-  function handleDrawerToggle() {
-    setMobileOpen(!mobileOpen)
+  function handleDrawerOpen() {
+    setOpen(true)
+  }
+
+  function handleDrawerClose() {
+    setOpen(false)
   }
 
   const drawer = (
@@ -178,14 +209,19 @@ const Routes = props => {
     <BrowserRouter>
       <Container fixed>
         <div className={classes.root}>
-          <AppBar position="fixed" className={classes.appBar}>
+          <AppBar
+            position="fixed"
+            className={clsx(classes.appBar, {
+              [classes.appBarShift]: open,
+            })}
+          >
             <Toolbar>
               <IconButton
                 color="inherit"
                 aria-label="Open drawer"
                 edge="start"
-                onClick={handleDrawerToggle}
-                className={classes.menuButton}
+                onClick={handleDrawerOpen}
+                className={clsx(classes.menuButton, open && classes.hide)}
               >
                 <MenuIcon />
               </IconButton>
@@ -196,39 +232,33 @@ const Routes = props => {
               <LoginButton />
             </Toolbar>
           </AppBar>
-          <nav className={classes.drawer} aria-label="Mailbox folders">
-            {/* The implementation can be swapped with js to avoid SEO duplication of links. */}
-            <Hidden smUp implementation="css">
-              <Drawer
-                container={container}
-                variant="temporary"
-                anchor={theme.direction === 'rtl' ? 'right' : 'left'}
-                open={mobileOpen}
-                onClose={handleDrawerToggle}
-                classes={{
-                  paper: classes.drawerPaper,
-                }}
-                ModalProps={{
-                  keepMounted: true, // Better open performance on mobile.
-                }}
-              >
-                {drawer}
-              </Drawer>
-            </Hidden>
-            <Hidden xsDown implementation="css">
-              <Drawer
-                classes={{
-                  paper: classes.drawerPaper,
-                }}
-                variant="permanent"
-                open
-              >
-                {drawer}
-              </Drawer>
-            </Hidden>
-          </nav>
-          <main className={classes.content}>
-            <Box my={12}>
+          <Drawer
+            className={classes.drawer}
+            variant="persistent"
+            anchor="left"
+            open={open}
+            classes={{
+              paper: classes.drawerPaper,
+            }}
+          >
+            <div className={classes.drawerHeader}>
+              <IconButton onClick={handleDrawerClose}>
+                {theme.direction === 'ltr' ? (
+                  <ChevronLeftIcon />
+                ) : (
+                  <ChevronRightIcon />
+                )}
+              </IconButton>
+            </div>
+            {drawer}
+          </Drawer>
+          <main
+            className={clsx(classes.content, {
+              [classes.contentShift]: open,
+            })}
+          >
+            <div className={classes.drawerHeader} />
+            <Container maxWidth="md">
               <Switch>
                 <Route exact path="/" component={() => <h1>App</h1>} />
                 {definedRoutes.map(route => (
@@ -237,7 +267,7 @@ const Routes = props => {
                 <PrivateRoute path="/app" component={() => <h1>App</h1>} />
                 <Route path="*" component={() => <h1>Page not found</h1>} />
               </Switch>
-            </Box>
+            </Container>
           </main>
         </div>
       </Container>
