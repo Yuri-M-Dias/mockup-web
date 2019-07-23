@@ -16,9 +16,11 @@ import {
 import {
   Add as AddIcon,
   ArrowRightAlt as ArrowRightIcon,
+  ArrowBack as ArrowBackIcon,
 } from '@material-ui/icons'
 import { orderBy } from 'lodash'
 import { compose } from 'recompose'
+import TeamEditor from '../components/TeamEditor'
 
 import { isAuthenticated } from '../services/auth'
 import api from '../services/api'
@@ -49,6 +51,7 @@ class Teams extends Component {
   state = {
     loading: true,
     teams: [],
+    teamEditorOpen: false,
   }
   componentDidMount() {
     this.getTeams()
@@ -63,17 +66,24 @@ class Teams extends Component {
     })
   }
 
+  handleCloseTeamEditor = () => {
+    this.getTeams()
+    this.setState({
+      teamEditorOpen: false,
+    })
+  }
+
   render() {
     const { classes } = this.props
 
     return (
       <Fragment>
-        <Typography variant="display1">Times</Typography>
+        <Typography variant="h5">Times</Typography>
         {this.state.teams.length > 0 ? (
           <Grid container className={classes.root} spacing={5}>
             {orderBy(this.state.teams, ['total', 'name'], ['desc', 'asc']).map(
               team => (
-                <Grid item xs sm>
+                <Grid item xs sm key={team.id}>
                   <Card className={classes.card}>
                     <CardHeader title={team.name} />
                     <CardContent>
@@ -99,11 +109,18 @@ class Teams extends Component {
             <Typography variant="subheading">Sem times para mostrar</Typography>
           )
         )}
-        <Link to="/teams/new">
-          <Fab color="primary" aria-label="Add" className={classes.fab}>
-            <AddIcon />
-          </Fab>
-        </Link>
+        <Fab
+          color="primary"
+          aria-label="Add"
+          onClick={e => this.setState({ teamEditorOpen: true })}
+          className={classes.fab}
+        >
+          <AddIcon />
+        </Fab>
+        <TeamEditor
+          open={this.state.teamEditorOpen}
+          handleClose={this.handleCloseTeamEditor}
+        />
       </Fragment>
     )
   }

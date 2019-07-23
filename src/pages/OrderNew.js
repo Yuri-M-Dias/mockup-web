@@ -14,13 +14,21 @@ import {
   Fab,
   Icon,
   TextField,
+  Snackbar,
+  Button,
 } from '@material-ui/core'
-import { Delete as DeleteIcon, Add as AddIcon } from '@material-ui/icons'
+import {
+  Delete as DeleteIcon,
+  Add as AddIcon,
+  ShoppingCart as CartIcon,
+  ArrowBack as ArrowBackIcon,
+} from '@material-ui/icons'
 import { find, findIndex, orderBy } from 'lodash'
 import { compose } from 'recompose'
 
 import { isAuthenticated } from '../services/auth'
 import api from '../services/api'
+import SnackbarContentWrapper from '../components/SnackbarContentWrapper'
 
 const styles = theme => ({
   root: {
@@ -58,6 +66,8 @@ class OrderNew extends Component {
       products: [],
     },
     total: 0,
+    redirect: false,
+    error: '',
   }
 
   componentDidMount() {
@@ -124,15 +134,34 @@ class OrderNew extends Component {
     this.updateTotal()
   }
 
+  handleCloseSnack(e, reason) {
+    this.setState({
+      error: '',
+    })
+  }
+
   sendCart = async e => {
     e.preventDefault()
     const { cart } = this.state
     const { team_id } = this.props.match.params
     try {
       const response = await api.post(`/teams/${team_id}/orders`, cart)
-      return <Redirect to={`/teams/${team_id}`} />
+      this.setState({
+        redirect: true,
+      })
     } catch (err) {
       console.error(err)
+      let errorResponse = err.response.data
+      this.setState({
+        error: errorResponse[0].message,
+      })
+    }
+  }
+
+  renderRedirect() {
+    if (this.state.redirect) {
+      const { team_id } = this.props.match.params
+      return <Redirect to={`/teams/${team_id}`} />
     }
   }
 
@@ -183,8 +212,28 @@ class OrderNew extends Component {
               )
             )}
           </Grid>
+          <Grid item xs={12}>
+            <Snackbar
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left',
+              }}
+              open={!!this.state.error}
+              autoHideDuration={10000}
+              onClose={(e, v) => this.handleCloseSnack(e, v)}
+              ContentProps={{
+                'aria-describedby': 'message-id',
+              }}
+            >
+              <SnackbarContentWrapper
+                onClose={(e, v) => this.handleCloseSnack(e, v)}
+                variant="error"
+                message={<Typography>{this.state.error}</Typography>}
+              />
+            </Snackbar>
+          </Grid>
           <Grid item xs={6}>
-            <Typography variant="h3">Total: {this.state.total}</Typography>
+            <Typography variant="h6">Total: {this.state.total}</Typography>
             <TextField
               label="Penalidade"
               value={this.state.cart.price_penalty}
@@ -200,9 +249,20 @@ class OrderNew extends Component {
           </Grid>
           <Grid item xs={6}>
             <IconButton onClick={this.sendCart} color="inherit">
-              <Typography>Send</Typography>
-              <DeleteIcon />
+              <Typography>Comprar</Typography>
+              <CartIcon />
             </IconButton>
+            {this.renderRedirect()}
+          </Grid>
+          <Grid item xs={12}>
+            <Button
+              variant="contained"
+              color="default"
+              onClick={() => this.props.history.goBack()}
+            >
+              Voltar
+              <ArrowBackIcon />
+            </Button>
           </Grid>
         </Grid>
       </Fragment>

@@ -11,8 +11,15 @@ import {
   ListItemText,
   ListItemSecondaryAction,
   Fab,
+  Button,
 } from '@material-ui/core'
-import { Delete as DeleteIcon, Add as AddIcon } from '@material-ui/icons'
+import {
+  Delete as DeleteIcon,
+  Add as AddIcon,
+  ArrowRightAlt as ArrowRightIcon,
+  ArrowBack as ArrowBackIcon,
+} from '@material-ui/icons'
+
 import { orderBy } from 'lodash'
 import { compose } from 'recompose'
 
@@ -101,12 +108,12 @@ class TeamDetail extends Component {
                             to={`/teams/${this.state.team.id}/orders/${order.id}`}
                           >
                             <ListItemText
-                              primary={order.createdAt}
-                              secondary={order.total}
+                              primary={`Total: ${order.total}`}
+                              secondary={order.created_at}
                             />
                             <ListItemSecondaryAction>
-                              <IconButton onClick={() => null} color="inherit">
-                                <DeleteIcon />
+                              <IconButton color="inherit">
+                                <ArrowRightIcon />
                               </IconButton>
                             </ListItemSecondaryAction>
                           </ListItem>
@@ -127,6 +134,16 @@ class TeamDetail extends Component {
                 <Typography variant="subheading">Time inválido</Typography>
               )
             )}
+          </Grid>
+          <Grid item xs={12}>
+            <Button
+              variant="contained"
+              color="default"
+              onClick={() => this.props.history.goBack()}
+            >
+              Voltar
+              <ArrowBackIcon />
+            </Button>
           </Grid>
         </Grid>
         <Link to={`/teams/${this.state.team.id}/orders/new`}>

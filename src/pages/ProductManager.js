@@ -17,6 +17,8 @@ import {
 import { Delete as DeleteIcon, Add as AddIcon } from '@material-ui/icons'
 import { orderBy } from 'lodash'
 import { compose } from 'recompose'
+import ProductEditor from '../components/ProductEditor'
+import ConfirmDeleteDialog from '../components/ConfirmDeleteDialog'
 
 import { isAuthenticated } from '../services/auth'
 import api from '../services/api'
@@ -48,6 +50,9 @@ class ProductManager extends Component {
   state = {
     loading: true,
     products: [],
+    productEditorOpen: false,
+    confirmDialogOpen: false,
+    error: '',
   }
   componentDidMount() {
     this.getProducts()
@@ -55,11 +60,33 @@ class ProductManager extends Component {
 
   async getProducts() {
     const products = await api.get('/products')
-    console.log([products])
     this.setState({
       loading: false,
       products: products.data,
     })
+  }
+
+  async deleteProduct(product_id) {
+    try {
+      const products = await api.delete(`/products/${product_id}`)
+      this.getProducts()
+    } catch (err) {
+      this.setState({
+        error: err.response.data,
+      })
+    }
+  }
+
+  handleCloseProductEditor = () => {
+    this.getProducts()
+    this.setState({
+      productEditorOpen: false,
+    })
+  }
+
+  handleChooseDeleteProduct = product_id => {
+    this.setState({ confirmDialogOpen: false })
+    this.deleteProduct(product_id)
   }
 
   render() {
@@ -75,17 +102,31 @@ class ProductManager extends Component {
             {this.state.products.length > 0 ? (
               <Paper elevation={1} className={classes.orders}>
                 <List>
-                  {orderBy(this.state.products, ['name'], ['desc']).map(
+                  {orderBy(this.state.products, ['price'], ['desc']).map(
                     product => (
                       <ListItem className={classes.listItem} key={product.id}>
                         <ListItemText
                           primary={product.name}
-                          secondary={product.base_price}
+                          secondary={`Preço: ${product.base_price}`}
                         />
                         <ListItemSecondaryAction>
-                          <IconButton onClick={() => null} color="inherit">
+                          <IconButton
+                            onClick={e =>
+                              this.setState({ confirmDialogOpen: true })
+                            }
+                            color="inherit"
+                          >
                             <DeleteIcon />
                           </IconButton>
+                          <ConfirmDeleteDialog
+                            open={this.state.confirmDialogOpen}
+                            handleClose={e =>
+                              this.setState({ confirmDialogOpen: false })
+                            }
+                            handleAgree={e =>
+                              this.handleChooseDeleteProduct(product.id)
+                            }
+                          />
                         </ListItemSecondaryAction>
                       </ListItem>
                     )
@@ -100,12 +141,22 @@ class ProductManager extends Component {
               )
             )}
           </Grid>
+          <Grid container item xs={12}>
+            <Typography>{this.state.error}</Typography>
+          </Grid>
         </Grid>
-        <Link to="/products/new">
-          <Fab color="primary" aria-label="Add" className={classes.fab}>
-            <AddIcon />
-          </Fab>
-        </Link>
+        <Fab
+          color="primary"
+          aria-label="Add"
+          onClick={e => this.setState({ productEditorOpen: true })}
+          className={classes.fab}
+        >
+          <AddIcon />
+        </Fab>
+        <ProductEditor
+          open={this.state.productEditorOpen}
+          handleClose={this.handleCloseProductEditor}
+        />
       </Fragment>
     )
   }

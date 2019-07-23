@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react'
-import { withRouter, Link } from 'react-router-dom'
+import { withRouter, Link, Redirect } from 'react-router-dom'
 import {
   Grid,
   withStyles,
@@ -12,7 +12,11 @@ import {
   ListItemSecondaryAction,
   Fab,
 } from '@material-ui/core'
-import { Delete as DeleteIcon, Add as AddIcon } from '@material-ui/icons'
+import {
+  Delete as DeleteIcon,
+  Add as AddIcon,
+  ArrowBack as ArrowBackIcon,
+} from '@material-ui/icons'
 import { orderBy } from 'lodash'
 import { compose } from 'recompose'
 
@@ -52,6 +56,8 @@ class OrderDetail extends Component {
   state = {
     loading: true,
     order: {},
+    redirect: false,
+    error: '',
   }
 
   componentDidMount() {
@@ -60,11 +66,38 @@ class OrderDetail extends Component {
 
   async getOrder() {
     const { team_id, order_id } = this.props.match.params
-    const order = await api.get(`/teams/${team_id}/orders/${order_id}`)
-    this.setState({
-      loading: false,
-      order: order.data[0], // HACK!
-    })
+    try {
+      const order = await api.get(`/teams/${team_id}/orders/${order_id}`)
+      this.setState({
+        loading: false,
+        order: order.data[0], // HACK!
+      })
+    } catch (err) {
+      this.setState({
+        error: err.response.data,
+      })
+    }
+  }
+
+  removeOrder = async e => {
+    const { team_id, order_id } = this.props.match.params
+    try {
+      await api.delete(`/teams/${team_id}/orders/${order_id}`)
+      this.setState({
+        redirect: true,
+      })
+    } catch (err) {
+      this.setState({
+        error: err.response.data,
+      })
+    }
+  }
+
+  renderRedirect() {
+    if (this.state.redirect) {
+      const { team_id } = this.props.match.params
+      return <Redirect to={`/teams/${team_id}`} />
+    }
   }
 
   render() {
@@ -107,11 +140,7 @@ class OrderDetail extends Component {
                               primary={product.name}
                               secondary={`${product.pivot.quantity} por ${product.base_price}`}
                             />
-                            <ListItemSecondaryAction>
-                              <IconButton onClick={() => null} color="inherit">
-                                <DeleteIcon />
-                              </IconButton>
-                            </ListItemSecondaryAction>
+                            <ListItemSecondaryAction></ListItemSecondaryAction>
                           </ListItem>
                         ))}
                       </List>
@@ -131,12 +160,23 @@ class OrderDetail extends Component {
               )
             )}
           </Grid>
+          <Grid container item xs={12}>
+            <Typography>{this.state.error}</Typography>
+            <Typography>Deletar compra?</Typography>
+            <IconButton onClick={this.removeOrder} color="inherit">
+              <DeleteIcon />
+            </IconButton>
+          </Grid>
         </Grid>
-        <Link to={`/teams/${team_id}/orders/new`}>
-          <Fab color="primary" aria-label="Add" className={classes.fab}>
-            <AddIcon />
-          </Fab>
-        </Link>
+        <Fab
+          color="primary"
+          aria-label="Back"
+          onClick={() => this.props.history.goBack()}
+          className={classes.fab}
+        >
+          <ArrowBackIcon />
+        </Fab>
+        {this.renderRedirect()}
       </Fragment>
     )
   }
