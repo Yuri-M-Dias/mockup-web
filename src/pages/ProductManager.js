@@ -52,6 +52,7 @@ class ProductManager extends Component {
     products: [],
     productEditorOpen: false,
     confirmDialogOpen: false,
+    product: null,
     error: '',
   }
   componentDidMount() {
@@ -69,6 +70,7 @@ class ProductManager extends Component {
   async deleteProduct(product_id) {
     try {
       const products = await api.delete(`/products/${product_id}`)
+      this.setState({ product: null })
       this.getProducts()
     } catch (err) {
       this.setState({
@@ -84,9 +86,9 @@ class ProductManager extends Component {
     })
   }
 
-  handleChooseDeleteProduct = product_id => {
+  handleChooseDeleteProduct = () => {
     this.setState({ confirmDialogOpen: false })
-    this.deleteProduct(product_id)
+    this.deleteProduct(this.state.product.id)
   }
 
   render() {
@@ -106,27 +108,21 @@ class ProductManager extends Component {
                     product => (
                       <ListItem className={classes.listItem} key={product.id}>
                         <ListItemText
-                          primary={product.name}
+                          primary={`${product.name} - ${product.created_at}`}
                           secondary={`Preço: ${product.base_price}`}
                         />
                         <ListItemSecondaryAction>
                           <IconButton
                             onClick={e =>
-                              this.setState({ confirmDialogOpen: true })
+                              this.setState({
+                                confirmDialogOpen: true,
+                                product: product,
+                              })
                             }
                             color="inherit"
                           >
                             <DeleteIcon />
                           </IconButton>
-                          <ConfirmDeleteDialog
-                            open={this.state.confirmDialogOpen}
-                            handleClose={e =>
-                              this.setState({ confirmDialogOpen: false })
-                            }
-                            handleAgree={e =>
-                              this.handleChooseDeleteProduct(product.id)
-                            }
-                          />
                         </ListItemSecondaryAction>
                       </ListItem>
                     )
@@ -156,6 +152,11 @@ class ProductManager extends Component {
         <ProductEditor
           open={this.state.productEditorOpen}
           handleClose={this.handleCloseProductEditor}
+        />
+        <ConfirmDeleteDialog
+          open={this.state.confirmDialogOpen}
+          handleClose={e => this.setState({ confirmDialogOpen: false })}
+          handleAgree={e => this.handleChooseDeleteProduct()}
         />
       </Fragment>
     )

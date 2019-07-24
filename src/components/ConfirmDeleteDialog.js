@@ -56,7 +56,7 @@ class ConfirmDeleteDialog extends Component {
           <Button
             variant="contained"
             color="primary"
-            onClick={this.props.handleAgree}
+            onClick={e => this.props.handleAgree(this.props.data)}
           >
             Deletar
           </Button>
